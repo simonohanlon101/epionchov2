@@ -37,7 +37,7 @@ theta <- structure(list(ABR = 5000,
                         durVC = 0L,
                         
                         #  Treatment 
-                        ntrt1 = 5L,
+                        ntrt1 = 30L,
                         ntrt2 = 0L,
                         ntrt3 = 0L,
                         ntrt4 = 0L,
