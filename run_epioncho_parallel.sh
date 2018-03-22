@@ -21,4 +21,4 @@ echo $DIR
 
 #  Run Rscripts in parallel
 echo "Calling R script. Do not close this terminal window!"
-parallel -j $cores --lb --progress "Rscript $DIR/run_epioncho_ivm.R {} $DIR" ::: {1..10}
+parallel -j $cores --lb --progress "Rscript $DIR/run_epioncho_ivm.R {} $DIR" ::: {1..151}
