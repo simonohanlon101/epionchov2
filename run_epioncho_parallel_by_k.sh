@@ -24,4 +24,4 @@ PARAMS="${DIR}/Imperial_parameters.txt"
 
 #  Run Rscripts in parallel
 echo "Calling R script. Do not close this terminal window!"
-parallel -a ${PARAMS} -j $cores --lb --progress "Rscript $DIR/run_epioncho_ivm_by_k.R {} $DIR {1} {2} {#}"
+parallel -a ${PARAMS} -j $cores --lb --progress "Rscript $DIR/run_epioncho_ivm_by_k.R $DIR {1} {2} {#}"
