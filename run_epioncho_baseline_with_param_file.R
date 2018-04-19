@@ -111,8 +111,8 @@ theta <- structure(list(ABR = 5000,
 
 
 #  Parameter values to alter in this simulation
-theta$ABR <- args[2]
-theta$kW0 <- args[3]
+theta$ABR <- as.numeric(args[2])
+theta$kW0 <- as.numeric(args[3])
 
 
 #  Output data.table
@@ -133,12 +133,13 @@ dt <- data.table( "time" = numeric(),
 #  Run model
 cat( paste0("Running ABR=" , theta$ABR, " and k=" , theta$kW0 , "\t" ,  system("echo $PARALLEL_SEQ") ) )
 out <- runEPIONCHO(theta = as.double(theta), itervtn = 0)
+out$k <- rep( theta$kW0 , times = length(out$time) )
 dt <- rbind( dt , as.list( out ) )
 
 
 #  Output file
 write.table( dt ,
-  file = paste0( "output/epioncho_renata_params_baseline___ABR_" , args[2] , "___k_" , args[3] , "___job_number_" , args[4] , ".txt" ) ,
+  file = paste0( "output/epioncho_renata_params_baseline___ABR_" , sprintf(fmt = "%06i", as.numeric(args[2])) , "___k_" , args[3] , "___job_number_" , args[4] , ".txt" ) ,
   quote = FALSE ,
   sep = "\t" ,
   row.names = FALSE
