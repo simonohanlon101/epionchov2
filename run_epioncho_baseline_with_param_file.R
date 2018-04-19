@@ -1,6 +1,8 @@
 #  Two arguments. 1) argument to set ABR, 2) present WD script was called from
 args <- commandArgs(TRUE)
 
+cat( args , sep = "\n" )
+
 #  Function to install any missing packaeges upon load
 pkg_load_or_install <- function( ... ){
   pkgs <- list(...)
