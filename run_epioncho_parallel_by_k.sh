@@ -20,8 +20,8 @@ DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 echo $DIR
 
 #  This file contains the parameters to use
-PARAMS='/Users/Simon/Dropbox/Work/Onchocerciasis\ projects/NTD\ MC\ Projections\ grant/Results/Simulations\ with\ interventions/Imperial_parameters.txt'
+PARAMS="${DIR}/Imperial_parameters.txt"
 
 #  Run Rscripts in parallel
 echo "Calling R script. Do not close this terminal window!"
-parallel -a ${PARAMS} -j $cores --lb --progress "Rscript $DIR/run_epioncho_ivm_by_k.R {} $DIR {1} {2}"
+parallel -a ${PARAMS} -j $cores --lb --progress "Rscript $DIR/run_epioncho_ivm_by_k.R {} $DIR {1} {2} {#}"
