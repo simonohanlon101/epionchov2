@@ -35,26 +35,26 @@ sourceCpp(file="EPIONCHOv2.cpp")
 theta <- structure(list(ABR = 5000,
                         effVC = 0L,
                         durVC = 0L,
-                        
-                        #  Treatment 
+
+                        #  Treatment
                         ntrt1 = 30L,
                         ntrt2 = 0L,
                         ntrt3 = 0L,
                         ntrt4 = 0L,
                         ntrt5 = 0L,
-                        
+
                         ftrt1 = 1L,
                         ftrt2 = 1L,
                         ftrt3 = 1L,
                         ftrt4 = 1L,
                         ftrt5 = 1L,
-                        
+
                         cov1 = 0.8,
                         cov2 = 0.8,
                         cov3 = 0.8,
                         cov4 = 0.8,
                         cov5 = 0.8,
-                        
+
                         noncmp = 0.05,
 
                         kW0 = 0.27,
@@ -112,11 +112,11 @@ theta <- structure(list(ABR = 5000,
 k <- seq(0,3,0.05)
 
 #  151 ABRs to calculate - this is the number of jobs we will run
-abrs <- seq( 0 , 3e4 , 200 )
+abrs <- c(3000,3400,3800,4400,5200,5400,7200,7800,9000,9200,10800)
 
 #  Set ABR for this cluster run ( qsub -J 1-401 .... )
-abr <- abrs[ as.integer( args[1] ) ]
-theta$ABR <- abr
+k <- k[ as.integer( args[1] ) ]
+theta$kW0 <- k
 
 
 #  Output data.table
@@ -135,13 +135,13 @@ dt <- data.table( "time" = numeric(),
                   "k" = numeric() )
 
 #  Run across all k values for this ABR
-for ( i in 1:length(k) ){
-  theta$kW0 <- k[i]
-  cat( paste0("Running ABR=" , abr, " and k=" , theta$kW0 , "\t" ,  system("echo $PARALLEL_SEQ") ) )
+for ( i in 1:length(abrs) ){
+  theta$ABR <- abrs[i]
+  cat( paste0("Running ABR=" , theta$ABR, " and k=" , theta$kW0 , "\t" ,  system("echo $PARALLEL_SEQ") ) )
   out <- runEPIONCHO(theta = as.double(theta), itervtn = 1)
   out$k <-  rep( theta$kW0 , length( out$ABR ) )
   dt <- rbind( dt , as.list( out ) )
 }
 
 #  Output file
-write.table( dt , file = paste0( "output/epioncho_30rnds_ivm_80pct_cov_" , sprintf( "%05d" , abr ) , ".txt" ) , quote = FALSE , sep = "\t" , row.names = FALSE )
+write.table( dt , file = paste0( "output/epioncho_30rnds_ivm_80pct_cov_" , k , ".txt" ) , quote = FALSE , sep = "\t" , row.names = FALSE )
