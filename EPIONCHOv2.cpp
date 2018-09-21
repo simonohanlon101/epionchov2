@@ -6,7 +6,7 @@
 #include <vector>
 #include <iostream>
 //#include <globalvars.h>
-  
+
 /* *************************************************************
 * EPIONCHOv2
 ************************************************************* */
@@ -17,8 +17,11 @@
 
 /* *************************************************************
 show debugging information
+0 = no information
+1 = show info on which steps are reached
+2 = output counter during time steps
 *************************************************************** */
-int DEBUG=0;
+int DEBUG=1;
 
 /* *************************************************************
 declare population dynamics parameters
@@ -27,37 +30,37 @@ declare population dynamics parameters
 /* the annual biting rate */
 double ABR0, ABR;
 double m0, m, BR;
-  
+
 /* within host population parameter */
 double deltaH0, deltaHinfty, cH;
 double alpha0, beta0, lambda0, lambda0adj;
-  
+
 /* distrubution parameters */
 double kW0,kW1, kM0, kM1;
-  
+
 /* skin snipping parameters */
 double wtss;
 int nss;
-    
+
 /* within vector population paarameters */
 double deltaV0, cV, aV, alphaV, aH, muL0, sigma1, sigma2, h, g, muV;
-    
+
 /* exposure function parameters */
 double q, E0, Q, alphaF, alphaM;
-    
+
 /* ivermectin or moxidectin treatment parameters */
 int mox = 0;
 double beta1Max, gammabeta, epsilonbeta, nu, omega, mu1Max, epsilonmu, zeta;
-      
+
 /* default treatment program parameters */
 double startTreat, startVC;
 int ntrt1, ntrt2, ntrt3, ntrt4, ntrt5;
 double ftrt1, ftrt2, ftrt3, ftrt4, ftrt5, cov1, cov2, cov3, cov4, cov5, noncmp;
 double contra = 5;
-      
+
 /* vector control parameters */
 double effVC, durVC;
-        
+
 /* globally fixed age & sex structure parameters */
 double muH = 0.04;
 int na = 80;
@@ -70,21 +73,21 @@ double gammaM, gammaF, EM, EF;
 int fcp = 2;
 int cnst = 100;
 int ncp = fcp+2;
-            
+
 /* total number of events */
 int tnev;
  /* total number of equations */
 int neq;
-            
+
 /* number of states modelled */
-              
+
 /* no L4 states */
 int nL4;
 /* mean prepatent period */
 double prepat;
 /* rate of progression */
  double gammaL;
-            
+
 /* no adult worm states */
 int nW;
 /* life expecancy */
@@ -98,13 +101,13 @@ int nM;
 double LEMf;
 /* mf mortality rate */
 double muM0;
-            
+
 int nst;
 int nlst = 3;
-            
+
 /* indicator varibles for states*/
  std::vector<int> L4id(1), Nid(1), Fid(1), Mid(1);
-            
+
 /* integers for jumping vector elements */
 int jumpj, jumpk, jumpl, jump, jumptoL1, jumptoL2, jumptoL3, nex, jpast;
 
@@ -126,42 +129,42 @@ int sumto;
 
  /* event vector  */
  std::vector<double> event(1);
-            
+
 /* exposure function vector */
 std::vector<double> OmegaM(na), OmegaF(na), Omega(ns*na);
-            
+
 /* integration variables */
 double t, stepbi, stepdi, stepai, switcht1, switcht2, switcht3, switcht4;
 /* this is for looking one year after last treatment for pOTTIS */
 double survperiod = 1;
  /* this is for checking the breakpoint */
 double elimperiod = 18;
-            
+
 /* step functions resized depending on parameters
  and then dynamically updated through time */
 std::vector<double> stepivm(1), stepmox(1), expo(1);
-            
+
 /* temporally dynamic parameters whihc are resized
 based on parameter values and then updated through time */
 std::vector<double> beta1(1), mu1(1), muM1(1), psi(1);
-            
+
 /* population size at each time step - resized */
 std::vector<double> y, ydot;
-            
+
 /* storage vectors for summing over worm age groups */
 std::vector<double> L4iicum(1), Niicum(1), Fiicum(1), Miicum(1);
-            
+
 /* storage vector for summing over net mf contribution from
 adult worms in different nominal age states */
 std::vector<double> lambdaiicum(1);
-            
+
 /* storage vectors for summming over exposure groups */
 std::vector<double> L4icum(1), Nicum(1), Ni(1), Ficum(1), Fi(1), Micum(1), netlambdacum(1);
-            
+
  /* storage vector for summing over net mf contribution from
  differentially exposed adult worms */
  std::vector<double> lambdaicum(1);
-            
+
 /* storage vectors for age dependent model output */
 std::vector<double> Nj(1);
 std::vector<double> Fj(1);
@@ -199,7 +202,7 @@ std::vector<double> lambdak(1);
 std::vector<double> L1k(1);
 std::vector<double> L2k(1);
 std::vector<double> L3k(1);
-            
+
 /* storage vector for states averaged over age & sex */
 std::vector<double> Nl(1);
 std::vector<double> Fl(1);
@@ -218,43 +221,43 @@ std::vector<double> L3l(1);
 
 /* population averages*/
 double N, F, W, M, M5, M20, Mp, Mp5, Mp20, Phi, L1, L2, L3, lambda, varM, Msq;
-            
+
 /* *************************************************************
 prototype functions
 *************************************************************** */
 
     void fillAgeStruc(double da, double muH, double amax, double contra);
-            
+
     void fillTreatStruc(int ntrt1, int ntrt2, int ntrt3, int ntrt4, int ntrt5, double ftrt1, double ftrt2, double ftrt3, double ftrt4, double ftrt5, int fcp);
-            
+
     void calcNormFacs();
-            
+
     void fillExpoStruc();
-            
+
     void calcEvents(std::vector<int> ntr);
-            
+
     void fillCompStruc();
-            
+
     void fillEventStruc();
-            
+
     void calcCov();
-            
+
     double checkSum(std::vector<double> x);
-            
+
     void updateSteps();
-            
+
     void updateParms();
-            
+
     void updateABR(double t, double ABR0);
-            
+
     void updateL3();
-            
+
     void updateHostStages();
-            
+
     void setStateIndicators();
-            
+
     void fillInits();
-            
+
 /* *************************************************************
  main dirivative function
  *************************************************************** */
@@ -264,13 +267,13 @@ void Diff(std::vector<double> y)
             int l, k, j, i, ii;
             int jumplcum[ncp+1];
             jumplcum[0] = 0;
-            
-            
+
+
             for (l=0; l<ncp; l++)
             {
               int jumpitl = ns*(nst*nev[l]*na+na*nlst);
               jumplcum[l+1] = jumplcum[l] + jumpitl;
-              
+
               /* tmp vectors for summing over exposure groups to
               * calculate adult worm and mf totals by age group */
                 Nicum.resize(nev[l]+1);
@@ -279,7 +282,7 @@ void Diff(std::vector<double> y)
                 Fi.resize(nev[l]+1);
                 Micum.resize(nev[l]+1);
                 netlambdacum.resize(nev[l] + 1);
-              
+
                 lambdaicum.resize(nev[l]+1);
                 Nicum[0] = 0;
                 Ni[0] = 0;
@@ -288,14 +291,14 @@ void Diff(std::vector<double> y)
                 Micum[0] = 0;
                 lambdaicum[0] = 0;
                 netlambdacum[0] = 0;
-              
+
               /* number of exposure groups within each age group
               * within current compliance group*/
                 nex = nst*nev[l];
-                
+
                 /* number of places to skip in current compliance group */
                 jumpl = jumplcum[l];
-                  
+
                 for (k=0; k<ns; k++)
                   {
                     jumpk = k*(nex*na+na*nlst);
@@ -306,11 +309,11 @@ void Diff(std::vector<double> y)
                       jumptoL1 = nex*na+jumpk+jumpl;
                       jumptoL2 = nex*na+na+jumpk+jumpl;
                       jumptoL3 = nex*na+2*na+jumpk+jumpl;
-                      
+
                       /* by worm exposure to differnt numbers of treatments */
                         for (i=0;i<nev[l];i++)
                         {
-                          
+
                           for (ii = 0; ii<nL4; ii++)
                           {
                             if (j < 1) {
@@ -336,10 +339,10 @@ void Diff(std::vector<double> y)
                               }
                             }
                           }
-                          
+
                           for (ii=0; ii<nW; ii++) {
                             /* first age group -  no incoming from aging and no treatment  */
-                              
+
                               if(j<1)
                               {
                                 if (ii<1) {
@@ -357,7 +360,7 @@ void Diff(std::vector<double> y)
                                       ydot[i+Fid[ii]*nev[l]+jump] = mu0*y[i+Fid[ii-1]*nev[l]+jump] +
                                         alpha0*y[i+Nid[ii]*nev[l]+jump] - (beta0 + mu0 + dda )*y[i+Fid[ii]*nev[l]+jump];
                                 }
-                                
+
                               }
                             else if (age[j]<contra)
                             {
@@ -397,11 +400,11 @@ void Diff(std::vector<double> y)
                             }
                           } // end ii (worm age) loop
                         } //end i loop
-                      
+
                       /* sum worms age groups and
                       and then over exposure groups
                       within each age class */
-                        
+
                         for (i=0; i<nev[l]; i++)
                         {
                           Niicum[0] = 0;
@@ -414,24 +417,24 @@ void Diff(std::vector<double> y)
                           Fi[i] = Fiicum[nW];
                           Nicum[i+1] = Nicum[i] + Niicum[nW];
                           Ficum[i+1] = Ficum[i] + Fiicum[nW];
-                          
+
                         }
-                      
-                      
+
+
                       Nj[j+k*na+l*ns*na] = Nicum[nev[l]];
                       Fj[j+k*na+l*ns*na] = Ficum[nev[l]];
                       Wj[j+k*na+l*ns*na] = Nj[j+k*na+l*ns*na] + Fj[j+k*na+l*ns*na];
                       WTj[j+k*na+l*ns*na] = 2*Wj[j+k*na+l*ns*na];
                       /* mating probability in each age group assuming a linear kW */
                         kW[j+k*na+l*ns*na] = kW0 + Wj[j+k*na+l*ns*na]*kW1;
-                      
+
                       /* proportion of total worm population that are fertile females */
                         pFj[j+k*na+l*ns*na] = Fj[j+k*na+l*ns*na]/(WTj[j+k*na+l*ns*na]);
-                      
+
                       /* mating probability */
                       Phij[j+k*na+l*ns*na] = 1 - pow(1 +  Wj[j+k*na+l*ns*na]*pow(kW[j+k*na+l*ns*na], -1), -(kW[j+k*na+l*ns*na]+1));
-                      
-                      /* loop again over the Mf exposure groups using all-worm mating probability 
+
+                      /* loop again over the Mf exposure groups using all-worm mating probability
                       and net incoming from all nominal adul worm age groups*/
                         for (i=0; i < nev[l]; i++)
                         {
@@ -445,10 +448,10 @@ void Diff(std::vector<double> y)
                                 lambdaiicum[ii+1] = lambdaiicum[ii] +  Phij[j+k*na+l*ns*na]*psi[i+nevcum[l]]*lambda0adj*(y[i+Fid[ii]*nev[l]+jump]);
                               }
                             }
-                          
+
                           lambdaicum[i] = lambdaiicum[nW];
-                          
-                          
+
+
                           for (int ii=0; ii<nM; ii++) {
                             /* microfilarial populations from different exposure groups */
                               /* first age group -  no incoming from aging and no treatment */
@@ -473,9 +476,9 @@ void Diff(std::vector<double> y)
                               }
                           } // end ii loop
                         } // end i loop
-                      
-                      
-                      
+
+
+
                       /* sum all the mf contributions from differntially exposed adults */
                         for (i=0; i<nev[l]; i++)
                         {
@@ -486,47 +489,47 @@ void Diff(std::vector<double> y)
                             }
                           Micum[i+1] = Micum[i] + Miicum[nM];
                         }
-                      
+
                       Mj[j+k*na+l*ns*na] = Micum[nev[l]];
                       /* overdispersion mf in the skin function */
                         kM[j+k*na+l*ns*na] = kM0*exp(Mj[j+k*na+l*ns*na]*kM1);
                       /* prevalence model  */
                         Mpj[j+k*na+l*ns*na] = (1 - pow(1+wtss* Mj[j+k*na+l*ns*na]/kM[j+k*na+l*ns*na], -kM[j+k*na+l*ns*na]*nss))*(1 - pow(1+Fj[j+k*na+l*ns*na]/kW[j+k*na+l*ns*na], -kW[j+k*na+l*ns*na]));
-                      
+
                       /* calculate the net proportion fecundity parameter acerageing over exposure groups */
                         for (i=0; i<nev[l]; i++)
                         {
                           netlambdacum[i+1] = netlambdacum[i] +  psi[i+nevcum[l]]*lambda0adj*(Ni[i] + Fi[i])/(Fj[j+k*na+l*ns*na]+Nj[j+k*na+l*ns*na]);
                         }
-                      
+
                       lambdaj[j+k*na+l*ns*na] = netlambdacum[nev[l]];
-                      
+
                         /* compute necessary components of variance function */
                         A[j+k*na+l*ns*na] = (1/(nss*wtss) + lambda0/muM0*(1+1/(nss*kM[j+k*na+l*ns*na])));
                         B[j+k*na+l*ns*na] = ( (1+ 1/(nss*kM[j+k*na+l*ns*na]))*(1 + 1/kW[j+k*na+l*ns*na]) - 1  );
                         Mjsq[j+k*na+l*ns*na] = Mj[j+k*na+l*ns*na]*Mj[j+k*na+l*ns*na];
-                        
+
                         varMj[j+k*na+l*ns*na]=A[j+k*na+l*ns*na]*Mj[j+k*na+l*ns*na] + B[j+k*na+l*ns*na]*Mjsq[j+k*na+l*ns*na];
-                        
-                        
+
+
                       /* calculate within blackfly larval population dynamics, biting on each age group
                       - set to equilibrium */
                         ydot[j+jumptoL1] = 0*y[j+jumptoL1];  /* L1 */
                         ydot[j+jumptoL2] = 0*y[j+jumptoL2]; /* L2 */
                         ydot[j+jumptoL3] = 0*y[j+jumptoL3]; /* L3 */
-                        
+
                         /* L1 density dependence incorporates overdispersion in adult worm burden as per Churcher et al (2006, 2008) but uses Filipe et al notatation (piV) and includes excess mortality on fly as a separate density dependence (i.e piV1 & piV2) */
-                        
+
                         double alpha;
                         alpha = Mj[j+k*na+l*ns*na]*aV/(Mj[j+k*na+l*ns*na]*aV+kW[j+k*na+l*ns*na]);
-                      
-                      
+
+
                         /* density-dependent establishment in blackfly */
                         PiV1j[j+k*na+l*ns*na] = pow((1-alpha)/(1-alpha*exp(-cV)), kW[j+k*na+l*ns*na])*(kW[j+k*na+l*ns*na]/(kW[j+k*na+l*ns*na]+(1-exp(-cV))*Mj[j+k*na+l*ns*na]*aV));
-                      
+
                         /* density-dependent excess mortality of blackly */
                         PiV2j[j+k*na+l*ns*na] = alphaV*Mj[j+k*na+l*ns*na];
-                      
+
                       if (k==0)
                       {
 
@@ -534,38 +537,38 @@ void Diff(std::vector<double> y)
                           BR*deltaV0*PiV1j[j+k*na+l*ns*na]*Mj[j+k*na+l*ns*na]*pow(muV + muH + alphaF +PiV2j[j+k*na+l*ns*na]+sigma1, -1);
                       } else if (k==1)
                       {
-                        
+
                         L1j[j+k*na+l*ns*na] =  y[j+jumptoL1] - y[j+jumptoL1] +
                           BR*deltaV0*PiV1j[j+k*na+l*ns*na]*Mj[j+k*na+l*ns*na]*pow(muV + muH + alphaM + PiV2j[j+k*na+l*ns*na]+sigma1, -1);
-                        
+
                       }
-                      
+
                       L2j[j+k*na+l*ns*na] = y[j+jumptoL2] - y[j+jumptoL2] +
                         L1j[j+k*na+l*ns*na]*sigma1*pow( muV + sigma2, -1);
-                      
+
                       L3j[j+k*na+l*ns*na] = y[j+jumptoL3] - y[j+jumptoL3] +
                         L2j[j+k*na+l*ns*na]*sigma2*pow(aH*pow(g, -1) + muV + muL0,-1);
-                      
+
                     } //end j loop
-                    
+
                   }//end k loop
-                  
+
             } // end l loop
-            
+
             return;
-            
+
               }//end function
-            
+
             void RungeKutta(double);
-            
+
             /* *************************************************************
               main program
             *************************************************************** */
-              
+
               // [[Rcpp::export]]
             Rcpp::List runEPIONCHO(std::vector<double> theta, int itervtn)
             {
-            
+
             /* ********************************
               read in parameter values
             ******************************** */
@@ -610,7 +613,7 @@ void Diff(std::vector<double> y)
             h = theta[38];
             g = theta[39];
             muV = theta[40];
-            
+
             E0 = theta[41];
             alphaF = theta[42];
             beta1Max = theta[43];
@@ -621,17 +624,17 @@ void Diff(std::vector<double> y)
             mu1Max = theta[48];
             epsilonmu = theta[49];
             zeta = theta[50];
-            
+
             LE = theta[51];
             LEMf = theta[52];
-            
+
             nL4 = (int)theta[53];
             nW = (int)theta[54];
             nM = (int)theta[55];
-            
+
             wtss = theta[56];
             nss = (int)theta[57];
-                
+
                 if (itervtn==0) {
                     ntrt1 = 0;
                     ntrt2 = 0;
@@ -642,7 +645,7 @@ void Diff(std::vector<double> y)
                     ncp = 1;
                 } else { fcp = 2;
                     ncp = fcp+2;}
-                
+
                 /* resize vectors now that ncp and fcp are redefined */
 
                 ntr.resize(fcp+2);
@@ -658,19 +661,19 @@ void Diff(std::vector<double> y)
                 ftr3.resize(fcp+2);
                 ftr4.resize(fcp+2);
                 ftr5.resize(fcp+2);
-                
+
                 pcp1.resize(ncp);
                 pcp2.resize(ncp);
                 pcp3.resize(ncp);
                 pcp4.resize(ncp);
                 pcp5.resize(ncp);
-                
+
                 therpcp1.resize(ncp);
                 therpcp2.resize(ncp);
                 therpcp3.resize(ncp);
                 therpcp4.resize(ncp);
                 therpcp5.resize(ncp);
-        
+
             /* reszize storage vectors for model averages  now that ncp and ns are defined */
                 Nj.resize(ncp*ns*na);
                 Fj.resize(ncp*ns*na);
@@ -692,7 +695,7 @@ void Diff(std::vector<double> y)
                 B.resize(ncp*ns*na);
                 Mjsq.resize(ncp*ns*na);
                 varMj.resize(ncp*ns*na);
-                
+
                 /* storage vector for states averaged over age */
                 Nk.resize(ncp*ns);
                 Fk.resize(ncp*ns);
@@ -700,7 +703,7 @@ void Diff(std::vector<double> y)
                 Mk.resize(ncp*ns);
                 M5k.resize(ncp*ns);
                 M20k.resize(ncp*ns);
-                
+
                 Mpk.resize(ncp*ns);
                 Mp5k.resize(ncp*ns);
                 Mp20k.resize(ncp*ns);
@@ -709,7 +712,7 @@ void Diff(std::vector<double> y)
                 L1k.resize(ncp*ns);
                 L2k.resize(ncp*ns);
                 L3k.resize(ncp*ns);
-                
+
                 /* storage vector for states averaged over age & sex */
                 Nl.resize(ncp);
                 Fl.resize(ncp);
@@ -717,7 +720,7 @@ void Diff(std::vector<double> y)
                 Ml.resize(ncp);
                 M5l.resize(ncp);
                 M20l.resize(ncp);
-                
+
                 Mpl.resize(ncp);
                 Mp5l.resize(ncp);
                 Mp20l.resize(ncp);
@@ -726,38 +729,38 @@ void Diff(std::vector<double> y)
                 L1l.resize(ncp);
                 L2l.resize(ncp);
                 L3l.resize(ncp);
-                
+
             /* derived parameter values */
             mu0 = nW*(1/LE);
             gammaL = nL4*(1/prepat);
             muM0 = nM*(1/LEMf);
-            
+
             nst = nL4 + 2*nW + nM;
             BR = h/g;
             m0 = ABR0/BR;
-            
+
             lambda0adj = lambda0*(alpha0+beta0+1/LE)/alpha0;
-            
+
             L4iicum.resize(nL4+1);
             Niicum.resize(nW+1);
             Fiicum.resize(nW+1);
             lambdaiicum.resize(nW+1);
             Miicum.resize(nM+1);
-            
+
             L4id.resize(nL4);
             Nid.resize(nW);
             Fid.resize(nW);
             Mid.resize(nM);
-       
+
             startTreat=150;
             startVC = startTreat;
-            
-            
+
+
             /* ********************************
               initialize global array structures &
               and other globally defined variables
             ******************************** */
-              
+
               /* sex structure - females (0) and males (1) */
               if (ns<2) {
                 /* removes sex structuring to speed up sims */
@@ -770,35 +773,35 @@ void Diff(std::vector<double> y)
                 psex[0] = rhoF;
                 psex[1] = 1 - rhoF;
               }
-            
-            
+
+
             /*relative exposure of males versus females */
               EM = 1/(rhoF/Q + 1 - rhoF);
             EF = EM/Q;
-            
+
             /* create age structure */
               fillAgeStruc(da, muH, amax, contra);
-            
+
             /* create treatment structure */
               fillTreatStruc(ntrt1, ntrt2, ntrt3, ntrt4, ntrt5, ftrt1, ftrt2, ftrt3, ftrt4, ftrt5, fcp);
-            
+
             /* calculate number events */
               calcEvents(ntr);
             tnev = nevcum[ncp];
-            
+
             /* resize event vector with length (available at run time)
             tnev (and which requires an additional "end" constant
                   term for each compliance group)
             */
               event.resize(tnev+ncp);
             fillEventStruc();
-            
+
             /* caluclate exposure structure
             * - first calculating normalization
             * factors */
               calcNormFacs();
             fillExpoStruc();
-            
+
             /* create compliance structure */
                 if (itervtn==0) {
                     pcmp1 = 1;
@@ -808,18 +811,18 @@ void Diff(std::vector<double> y)
             pcmp3 = std::fmax(cov3 - (1/(1-fcp))*(cov3+noncmp-1), 0);
             pcmp4 = std::fmax(cov4 - (1/(1-fcp))*(cov4+noncmp-1), 0);
             pcmp5 = std::fmax(cov5 - (1/(1-fcp))*(cov5+noncmp-1), 0);
-            
+
             psemi1 =  cov1 - std::fmax(cov1 - (1/(1-fcp))*(cov1+noncmp-1), 0);
             psemi2 =  cov2 - std::fmax(cov2 -  (1/(1-fcp))*(cov2+noncmp-1), 0);
             psemi3 =  cov3 - std::fmax(cov3 - (1/(1-fcp))*(cov3+noncmp-1), 0);
             psemi4 =  cov4 - std::fmax(cov4 - (1/(1-fcp))*(cov4+noncmp-1), 0);
             psemi5 =  cov5 - std::fmax(cov5 - (1/(1-fcp))*(cov5+noncmp-1), 0);
                 }
-            
+
             /* fill the treatment coverage of each
              compliance group */
               fillCompStruc();
-            
+
             /* caluclate the acheived population-level
             * coverage (accounting for contraindicated age group) */
               if (fcp==0)
@@ -835,20 +838,20 @@ void Diff(std::vector<double> y)
             therpcpcum3.resize(sumto);
             therpcpcum4.resize(sumto);
             therpcpcum5.resize(sumto);
-            
+
             calcCov();
-            
+
             /* resize step functions depending on parameter values */
               stepivm.resize(tnev+ncp);
             stepmox.resize(tnev+ncp);
             expo.resize(tnev);
-            
+
             /* resize temporally dynamic rate parameters */
               beta1.resize(tnev);
             mu1.resize(tnev);
             muM1.resize(tnev);
             psi.resize(tnev);
-            
+
             /* ********************************
               debugging information
             ******************************** */
@@ -876,7 +879,7 @@ void Diff(std::vector<double> y)
                 Rcpp::Rcout << "male exposure structure summation = " << cumsumM[na] << std::endl;
                 Rcpp::Rcout << "female exposure structure summation = " << cumsumF[na] << std::endl;
                   if (itervtn > 0) {
-                  
+
                 Rcpp::Rcout << "coverage summation before switch = " << checkSum(pcp1) << std::endl;
                 Rcpp::Rcout << "coverage summation after first switch = " << checkSum(pcp2) << std::endl;
                 Rcpp::Rcout << "coverage summation after second switch = " << checkSum(pcp3) << std::endl;
@@ -887,8 +890,8 @@ void Diff(std::vector<double> y)
                 Rcpp::Rcout << "population coverage after second switch = " << actcov3 << std::endl;
                 Rcpp::Rcout << "population coverage after third switch = " << actcov4 << std::endl;
                 Rcpp::Rcout << "population coverage after fourth switch = " << actcov5 << std::endl;
-                
-                
+
+
                 for (int i=0; i<(tnev+ncp); i++)
                 {
                   if (i==0) {
@@ -898,23 +901,25 @@ void Diff(std::vector<double> y)
                   } else{
                     Rcpp::Rcout << ", " << event[i];
                   }
-                  
+
                 }
                   }
-                
+
               }
-            
+
             /* ***************************************************************
               initialize time variables, step size & number of equations in model
             ***************************************************************** */
-              
+
               t=0;
             /* step size before intervention (every 1/2 year) */
-              stepbi=.5;
-            /* step size during intervention (approx. every  3 days) */
-              stepdi=0.008;
-            /* step size after intervention (approx. every 22 days) */
-              stepai=stepdi*11;
+              stepbi=.25;
+            /* step size during intervention (every day: 1/365.25) */
+            /* This controls the size of step for the algorithmn */
+              stepdi=0.002737850787;
+            /* step size after intervention (approx. every 28 days: 1/365.25*28) */
+            /* This controls how fine-grained the output is */
+              stepai=stepdi*28;
             double Everydi = stepai; //(approx. every month)
             double Everyai = stepai;
             /* number of model equations */
@@ -925,17 +930,19 @@ void Diff(std::vector<double> y)
               neqcum[l+1] = neqcum[l] + ns*na*(nst*nev[l]+nlst);
             }
             neq = neqcum[ncp];
-            
+
             switcht1 = startTreat + (ntr1[0])*ftr1[0];
             switcht2 = startTreat + (ntr1[0])*ftr1[0] + (ntr2[0]*ftr2[0]);
             switcht3 = startTreat + (ntr1[0])*ftr1[0] + (ntr2[0]*ftr2[0]) + (ntr3[0]*ftr3[0]);
             switcht4 = startTreat + (ntr1[0])*ftr1[0] + (ntr2[0]*ftr2[0]) + (ntr3[0]*ftr3[0]) +
               (ntr4[0]*ftr4[0]);
-            
-            double maxt0, maxt1, maxt;
-            
+
+            double maxt0, maxt1, maxt, treatLength;
+
                 if (itervtn>0)
                 {
+                  treatLength = ntr1[0]*ftr1[0] + ntr2[0]*ftr2[0] + ntr3[0]*ftr3[0] +
+                    ntr4[0]*ftr4[0] + ntr5[0]*ftr5[0];
             maxt0 = startTreat + ntr1[0]*ftr1[0] + ntr2[0]*ftr2[0] + ntr3[0]*ftr3[0] +
               ntr4[0]*ftr4[0] + ntr5[0]*ftr5[0] + survperiod;
             maxt1 = maxt0 + elimperiod;
@@ -945,41 +952,45 @@ void Diff(std::vector<double> y)
                     maxt0 = maxt;
                     maxt1 = maxt;
                 }
-            
+
             if(DEBUG>0) {
               Rcpp::Rcout << "number of states in model = " << neq << std::endl;
             }
-            
+
             /* resize y to be of approrpirate length */
               y.resize(neq), ydot.resize(neq);
-            
+
             if(DEBUG>0) {
               Rcpp::Rcout << "initialising model equations..." << std::endl;
             }
-            
+
             setStateIndicators();
             fillInits();
             Diff(y);
-            
+
             /* create output array for string specified
             population averages */
               double pretreat = 0.5;
             double startOutput = (startTreat - pretreat);
                 int testnrow, nrow;
                 if (itervtn>0){
-                    testnrow =  floor( (maxt0 - Everydi - startOutput) /Everydi )  + floor( (maxt1 - Everyai - maxt0) /Everyai );
+                    testnrow =  floor( (maxt0 - Everydi - startOutput) / Everydi )  + floor( (maxt1 - Everyai - maxt0) / Everyai );
                 } else {
-                    testnrow =  floor( (maxt0 - Everydi - startOutput) /Everydi ) + 1;
+                    testnrow =  floor( (maxt0 - Everydi - startOutput) / Everydi ) + 1;
                 }
             if (testnrow>0) {
-              nrow = testnrow; } 
+              nrow = testnrow;
+              if(DEBUG>0) {
+                Rcpp::Rcout << "Length of output vector = " << nrow << std::endl;
+              }
+            }
             else { nrow = 1; }
             std::vector<double> tout(nrow);
             std::vector<double> L3out(nrow);
             std::vector<double> Mout(nrow);
             std::vector<double> M5out(nrow);
             std::vector<double> M20out(nrow);
-            
+
             std::vector<double> Mpout(nrow);
             std::vector<double> Mp5out(nrow);
             std::vector<double> Mp20out(nrow);
@@ -997,12 +1008,12 @@ void Diff(std::vector<double> y)
             std::vector<double> Mp5semi1(nrow);
             std::vector<double> Mp5semi2(nrow);
             std::vector<double> Mp5noncmp(nrow);
-            
+
             if(DEBUG>0) {
               Rcpp::Rcout << "running model..." << std::endl;
             }
-            
-            
+
+
             do {
               /*update step functions */
                 updateSteps();
@@ -1018,10 +1029,20 @@ void Diff(std::vector<double> y)
                 RungeKutta(stepbi);
               t+=stepbi;
             } while (t<(startTreat-pretreat));
-            
+
+            if(DEBUG>0) {
+              Rcpp::Rcout << "Completed running to equilibrium..." << std::endl;
+            }
+
             int counter = 0;
-            t = startTreat-pretreat;
-            
+            /*  EDIT: @SOHANLON //CHANGING TIME DURING INTERVENTION NOT ALLOWED// */
+            /*t = startTreat-pretreat;*/
+            if(DEBUG>0) {
+              Rcpp::Rcout << "Now recording outputs..." << std::endl;
+              Rcpp::Rcout << "Time is currently:\t" << t << std::endl;
+              Rcpp::Rcout << "Interventions will start at time:\t" << startTreat << std::endl;
+            }
+
             do {
               /*update step functions */
                 updateSteps();
@@ -1036,16 +1057,24 @@ void Diff(std::vector<double> y)
               /* integrate to determine states at next time step */
                 RungeKutta(stepdi);
                 t+=stepdi;
+
+                if(DEBUG>1) {
+                  if(counter % 1 == 0){
+                    Rcpp::Rcout << "\rValue of time is:\t" << t;
+                    Rcpp::Rcout << "\tValue of counter is:\t" << counter;
+                  }
+                }
+
               /* fill storeage matrix with current values */
                   if( floor((t-(startTreat-pretreat))/Everydi) > floor(((t-(startTreat-pretreat))-stepdi)/Everydi) )
-                    
+
                   {
                     tout[counter]=t-startTreat;
                     L3out[counter]=L3;
                     Mout[counter]=M;
                     M5out[counter]=M5;
                     M20out[counter]=M20;
-                    
+
                     Mpout[counter]=Mp;
                     Mp5out[counter]=Mp5;
                     Mp20out[counter]=Mp20;
@@ -1065,62 +1094,83 @@ void Diff(std::vector<double> y)
                     Mp5noncmp[counter] = Mp5l[3];
                     counter+=1;
                   }
-            } while (t<maxt0);
-            
-                if (itervtn>0) {
-            do {
-              /*update step functions */
-                updateSteps();
-              /* update dynamic treatment parameters */
-                updateParms();
-              /*update ABR (for vector control) */
-                updateABR(t, ABR0);
-              /* update mean number of L3 */
-                updateL3();
-              /* update mean number of host parasite stages */
-                updateHostStages();
-              /* integrate to determine states at next time step */
-                RungeKutta(stepai);
-              /* print temp dyamic par */
-                t+=stepai;
-              if( floor((t-(startTreat-pretreat))/Everyai) > floor(((t-(startTreat-pretreat))-stepai)/Everyai) )
-                
-                {
-                  tout[counter]=t-startTreat;
-                  L3out[counter]=L3;
-                  Mout[counter]=M;
-                  M5out[counter]=M5;
-                  M20out[counter]=M20;
-                  
-                  Mpout[counter]=Mp;
-                  Mp5out[counter]=Mp5;
-                  Mp20out[counter]=Mp20;
-                  Nout[counter] = N;
-                  Fout[counter]=F;
-                  Wout[counter] = W;
-                  ABRout[counter] = ABR;
-                  ATPout[counter] = ABR*L3;
-                  lambdaout[counter] = lambda;
-                  Mfull[counter] = Ml[0];
-                  Msemi1[counter] = Ml[1];
-                  Msemi2[counter] = Ml[2];
-                  Mnoncmp[counter] = Ml[3];
-                  Mp5full[counter] = Mp5l[0];
-                  Mp5semi1[counter] = Mp5l[1];
-                  Mp5semi2[counter] = Mp5l[2];
-                  Mp5noncmp[counter] = Mp5l[3];
-                  counter+=1;
-                  
-                }
-              
-            } while (t<maxt1 && t>(maxt0-stepdi));
-                }
-            
-            
+            } while (t < maxt0);
+
             if(DEBUG>0) {
-              Rcpp::Rcout << "completed integration." << std::endl;
+              Rcpp::Rcout << "\nCompleted intervention scenario + 1 year surviellance looking for pOTTIS." << std::endl;
+              Rcpp::Rcout << "Interventions ran over:\t" << treatLength;
+              Rcpp::Rcout << " years.\nTime is currently:\t" << t << std::endl;
             }
-            
+
+            if (itervtn>0) {
+              if(DEBUG>0) {
+                Rcpp::Rcout << "\nRunning post-treatment timeline to see if elimination acheived.\nTime:" << std::endl;
+              }
+              do {
+                Rcpp::Rcout << "\t" << t;
+                /*update step functions */
+                updateSteps();
+                /* update dynamic treatment parameters */
+                updateParms();
+                /*update ABR (for vector control) */
+                updateABR(t, ABR0);
+                /* update mean number of L3 */
+                updateL3();
+                /* update mean number of host parasite stages */
+                updateHostStages();
+                /* integrate to determine states at next time step */
+                RungeKutta(stepai);
+                /* print temp dyamic par */
+                t+=stepai;
+
+                if( floor((t-(startTreat-pretreat))/Everyai) > floor(((t-(startTreat-pretreat))-stepai)/Everyai) )
+
+                {
+                  if( counter < nrow )
+                  {
+                    tout[counter]=t-startTreat;
+                    L3out[counter]=L3;
+                    Mout[counter]=M;
+                    M5out[counter]=M5;
+                    M20out[counter]=M20;
+
+                    Mpout[counter]=Mp;
+                    Mp5out[counter]=Mp5;
+                    Mp20out[counter]=Mp20;
+                    Nout[counter] = N;
+                    Fout[counter]=F;
+                    Wout[counter] = W;
+                    ABRout[counter] = ABR;
+                    ATPout[counter] = ABR*L3;
+                    lambdaout[counter] = lambda;
+                    Mfull[counter] = Ml[0];
+                    Msemi1[counter] = Ml[1];
+                    Msemi2[counter] = Ml[2];
+                    Mnoncmp[counter] = Ml[3];
+                    Mp5full[counter] = Mp5l[0];
+                    Mp5semi1[counter] = Mp5l[1];
+                    Mp5semi2[counter] = Mp5l[2];
+                    Mp5noncmp[counter] = Mp5l[3];
+                    counter+=1;
+                  }
+                }
+
+                if(DEBUG>1) {
+                  if(counter % 1 == 0){
+                    Rcpp::Rcout << "\rValue of time is:\t" << t;
+                    Rcpp::Rcout << "\tValue of counter is:\t" << counter;
+                  }
+                }
+              } while ( t<maxt1 );
+              }
+
+
+              Rcpp::Rcout << "\nCompleted integration." << std::endl;
+              Rcpp::Rcout << "Final length of output vectors was " << nrow;
+              Rcpp::Rcout << " whilst the program had " << tout.size();
+              Rcpp::Rcout << " time steps." << std::endl;
+              Rcpp::Rcout << "Time is currently:\t" << t << std::endl;
+
             return  Rcpp::List::create(Rcpp::Named("time") = tout,
                                        Rcpp::Named("L3") = L3out,
                                        Rcpp::Named("M") = Mout,
@@ -1133,14 +1183,14 @@ void Diff(std::vector<double> y)
                                        Rcpp::Named("F") = Fout,
                                        Rcpp::Named("W") = Wout,
                                        Rcpp::Named("ABR") = ABRout);
-            
+
             }
-            
-            
+
+
             /* *************************************************************
               utility functions...
             *************************************************************** */
-              
+
               /* *************************************************************
               function to create age structure
             *************************************************************** */
@@ -1177,7 +1227,7 @@ void Diff(std::vector<double> y)
             }
             ucontra = ucontracum[na];
               }
-            
+
             /* *************************************************************
               function to fill number & frequency of treatments
             in each compliance group
@@ -1288,10 +1338,10 @@ void Diff(std::vector<double> y)
   }
             }
               }
-            
+
             void calcNormFacs()
             {
-            
+
             pacumM[0] = 0;
             pacumF[0] = 0;
             int j;
@@ -1311,7 +1361,7 @@ void Diff(std::vector<double> y)
             gammaF = pow(pacumF[na], -1);
             gammaM = pow(pacumM[na], -1);
             }
-            
+
             void fillExpoStruc()
             {
             int j;
@@ -1328,7 +1378,7 @@ void Diff(std::vector<double> y)
                 OmegaM[j] = EM*gammaM*exp(-alphaM*(age[j]-q));
               }
             }
-            
+
             /* join exposure functions together into a single vector
             * females first folowed by males*/
               for (j = 0; j< (ns*na); j++)
@@ -1343,12 +1393,12 @@ void Diff(std::vector<double> y)
                 }
               }
             }
-            
+
             /* *************************************************************
               calculate number of events in eatch comoliance group
             and cumulative number of events - depends on ntr vector
             *************************************************************** */
-              
+
               void calcEvents(std::vector<int> ntr)
             {
             /* events vector with a dummy event
@@ -1362,7 +1412,7 @@ void Diff(std::vector<double> y)
               nevcum[l+1] = nevcum[l] + nev[l];
             }
               }
-            
+
             /* *************************************************************
               function to create event structure
             *************************************************************** */
@@ -1371,7 +1421,7 @@ void Diff(std::vector<double> y)
             for (int l = 0; l<ncp; l++)
             {
               int jumpi = nevcum[l]+l;
-              
+
               /* set the time of events (treatments + dummy events)
               for the complicance group 0 that is treated every round */
                 if (l==0)
@@ -1413,14 +1463,14 @@ void Diff(std::vector<double> y)
                       event[i + jumpi] = startTreat + (ntr1[l])*ftr1[l] + ntr2[l]*ftr2[l] + ntr3[l]*ftr3[l] + ntr4[l]*ftr4[l] + ii*ftr5[l];
                                         }
                   }
-                  
+
                 }
-              
+
               /* set the times of events (treatments + dummy events) for
               the complicance groups that are treated once every fcp rounds -
                 this is done by picking appropriate elements from the fully
               compliant event vector */
-                
+
                 else if (l>0)
                 {
                   for (int i = 0; i<(nev[l]+1); i++)
@@ -1429,7 +1479,7 @@ void Diff(std::vector<double> y)
                     {
                       event[i+jumpi] = 0;
                     }
-                    else if (i > 0 & i < nev[l])
+                    else if ((i > 0) & (i < nev[l]))
                     {
                       event[i+jumpi] = event[i + (l-1) + (i-1)*(fcp-1)];
                     }
@@ -1438,13 +1488,13 @@ void Diff(std::vector<double> y)
                       event[i+jumpi] = startTreat +  ntr1[l]*ftr1[l] + ntr2[l]*ftr2[l] + ntr3[l]*ftr3[l] +
                         ntr4[l]*ftr4[l] + ntr5[l]*ftr5[l] + cnst;
                     }
-                    
+
                   }
                 }
             }
               }
-            
-            
+
+
             /* *************************************************************
               function to create compliance structure
             *************************************************************** */
@@ -1465,7 +1515,7 @@ void Diff(std::vector<double> y)
                 therpcp4[l] = pcp4[l]*(1-ucontra);
                 pcp5[l] = pcmp5;
                 therpcp5[l] = pcp5[l]*(1-ucontra);
-                
+
               }
               else if (fcp==0 && l>0)
               {
@@ -1520,9 +1570,9 @@ void Diff(std::vector<double> y)
                 therpcp5[l] = 0;
               }
             }
-            
+
               }
-            
+
             void calcCov()
             {
             therpcpcum1[0] = 0;
@@ -1539,14 +1589,14 @@ void Diff(std::vector<double> y)
               therpcpcum4[l+1]=therpcpcum4[l]+therpcp4[l];
               therpcpcum5[l+1]=therpcpcum5[l]+therpcp5[l];
             }
-            
+
             actcov1 = therpcpcum1[sumto-1];
             actcov2 = therpcpcum2[sumto-1];
             actcov3 = therpcpcum3[sumto-1];
             actcov4 = therpcpcum4[sumto-1];
             actcov5 = therpcpcum5[sumto-1];
             }
-            
+
             /* *************************************************************
               function to check summation to 1
             *************************************************************** */
@@ -1560,7 +1610,7 @@ void Diff(std::vector<double> y)
                 }
                 return cumsum[n];
               }
-            
+
             /* *************************************************************
               update step functions at each time step
             *************************************************************** */
@@ -1583,7 +1633,7 @@ void Diff(std::vector<double> y)
                 }
               }
             }
-            
+
             for (l = 0; l < ncp; l++)
             {
               int jumpi = nevcum[l]+l;
@@ -1607,7 +1657,7 @@ void Diff(std::vector<double> y)
                 }
               }
             }
-            
+
             for (l = 0; l < ncp; l++)
             {
               int jumpi = nevcum[l]+l;
@@ -1632,12 +1682,12 @@ void Diff(std::vector<double> y)
               }
             }
               }
-            
-            
+
+
             /* *************************************************************
               update ABR  at each time step (for vector control, rectangular distribution)
             *************************************************************** */
-              
+
               /* to make changes to ABR if it is called as an argument, ut must be called by
             reference not by value */
               void updateABR(double t, double ABR0)
@@ -1649,7 +1699,7 @@ void Diff(std::vector<double> y)
             if (t<startVC)
             {
               ABRnew = ABRold;
-              
+
             } else if (t>(startVC+durVC))
             {
               ABRnew = ABRold;
@@ -1661,9 +1711,9 @@ void Diff(std::vector<double> y)
               ABR = ABRnew;
             m = ABR/BR;
               }
-            
 
-            
+
+
             /* *************************************************************
               update average L3  at each time step
             *************************************************************** */
@@ -1708,7 +1758,7 @@ void Diff(std::vector<double> y)
             }
             L3 = L3lcum[ncp];
               }
-            
+
             /* *************************************************************
               update human parasite stage averages  at each time step
             *************************************************************** */
@@ -1776,13 +1826,13 @@ void Diff(std::vector<double> y)
             lambdajcum[0] = 0;
             lambdakcum[0] = 0;
             lambdalcum[0] = 0;
-            
-            
+
+
                 std::vector<double> Mjsqcum(ns*na*ncp+1);
                 Mjsqcum[0] = 0;
                 std::vector<double> varMjcum(ns*na*ncp+1);
                 varMjcum[0] = 0;
-            
+
             for (l = 0; l<ncp; l++)
             {
               for (k=0; k<ns; k++)
@@ -1798,14 +1848,14 @@ void Diff(std::vector<double> y)
                   Njcum[j+1] = Njcum[j] + Nj[j+k*na+l*ns*na]*pa[j];
                   Fjcum[j+1] = Fjcum[j] + Fj[j+k*na+l*ns*na]*pa[j];
                   Wjcum[j+1] = Wjcum[j] + Wj[j+k*na+l*ns*na]*pa[j];
-                    
+
                     /* component s to construct variance assume to come from 5+pop */
                     Mjsqcum[j+1] = Mjsqcum[j] + Mjsq[j+k*na+l*ns*na]*pa5[j];
                     varMjcum[j+1] = varMjcum[j] + varMj[j+k*na+l*ns*na]*pa5[j];
-                    
+
                   lambdajcum[j+1] = lambdajcum[j] + lambdaj[l+k*na+l*ns*na]*pa[j];
-              
-                } 
+
+                }
                 Mk[k+l*ns] = Mjcum[na];
                 Mkcum[k+1] = Mkcum[k] + Mk[k+l*ns]*psex[k];
                 M5k[k+l*ns] = M5jcum[na];
@@ -1826,7 +1876,7 @@ void Diff(std::vector<double> y)
                 Wkcum[k+1] = Wkcum[k] + Wk[k+l*ns]*psex[k];
                 lambdak[k+l*ns] = lambdajcum[na];
                 lambdakcum[k+1] = lambdakcum[k] + lambdak[k+l*ns]*psex[k];
-                
+
               }
               Ml[l] = Mkcum[ns];
               M5l[l] = M5kcum[ns];
@@ -1838,7 +1888,7 @@ void Diff(std::vector<double> y)
               Fl[l] = Fkcum[ns];
               Wl[l] = Wkcum[ns];
               lambdal[l] = lambdakcum[ns];
-              
+
               if (t <= switcht1)
               {
                 Mlcum[l+1] = Mlcum[l] + Ml[l]*pcp1[l];
@@ -1851,14 +1901,14 @@ void Diff(std::vector<double> y)
                 Flcum[l+1] = Flcum[l] + Fl[l]*pcp1[l];
                 Wlcum[l+1] = Wlcum[l] + Wl[l]*pcp1[l];
                 lambdalcum[l+1] = lambdalcum[l]+lambdal[l]*pcp1[l];
-                  
+
               }
               else if (t>switcht1 && t<=switcht2)
               {
                 Mlcum[l+1] = Mlcum[l] + Ml[l]*pcp2[l];
                 M5lcum[l+1] = M5lcum[l] + M5l[l]*pcp2[l];
                 M20lcum[l+1] = M20lcum[l] + M20l[l]*pcp2[l];
-                
+
                 Mplcum[l+1] = Mplcum[l] + Mpl[l]*pcp2[l];
                 Mp5lcum[l+1] = Mp5lcum[l] + Mp5l[l]*pcp2[l];
                 Mp20lcum[l+1] = Mp20lcum[l] + Mp20l[l]*pcp2[l];
@@ -1866,14 +1916,14 @@ void Diff(std::vector<double> y)
                 Flcum[l+1] = Flcum[l] + Fl[l]*pcp2[l];
                 Wlcum[l+1] = Wlcum[l] + Wl[l]*pcp2[l];
                 lambdalcum[l+1] = lambdalcum[l]+lambdal[l]*pcp2[l];
-                
-              } 
+
+              }
               else if (t>switcht2 && t<=switcht3)
               {
                 Mlcum[l+1] = Mlcum[l] + Ml[l]*pcp3[l];
                 M5lcum[l+1] = M5lcum[l] + M5l[l]*pcp3[l];
                 M20lcum[l+1] = M20lcum[l] + M20l[l]*pcp3[l];
-                
+
                 Mplcum[l+1] = Mplcum[l] + Mpl[l]*pcp3[l];
                 Mp5lcum[l+1] = Mp5lcum[l] + Mp5l[l]*pcp3[l];
                 Mp20lcum[l+1] = Mp20lcum[l] + Mp20l[l]*pcp3[l];
@@ -1881,13 +1931,13 @@ void Diff(std::vector<double> y)
                 Flcum[l+1] = Flcum[l] + Fl[l]*pcp3[l];
                 Wlcum[l+1] = Wlcum[l] + Wl[l]*pcp3[l];
                 lambdalcum[l+1] = lambdalcum[l]+lambdal[l]*pcp3[l];
-                
+
               }    else if (t>switcht3 && t<=switcht4)
               {
                 Mlcum[l+1] = Mlcum[l] + Ml[l]*pcp4[l];
                 M5lcum[l+1] = M5lcum[l] + M5l[l]*pcp4[l];
                 M20lcum[l+1] = M20lcum[l] + M20l[l]*pcp4[l];
-                
+
                 Mplcum[l+1] = Mplcum[l] + Mpl[l]*pcp4[l];
                 Mp5lcum[l+1] = Mp5lcum[l] + Mp5l[l]*pcp4[l];
                 Mp20lcum[l+1] = Mp20lcum[l] + Mp20l[l]*pcp4[l];
@@ -1895,14 +1945,14 @@ void Diff(std::vector<double> y)
                 Flcum[l+1] = Flcum[l] + Fl[l]*pcp4[l];
                 Wlcum[l+1] = Wlcum[l] + Wl[l]*pcp4[l];
                 lambdalcum[l+1] = lambdalcum[l]+lambdal[l]*pcp4[l];
-                
+
               }
               else
               {
                 Mlcum[l+1] = Mlcum[l] + Ml[l]*pcp5[l];
                 M5lcum[l+1] = M5lcum[l] + M5l[l]*pcp5[l];
                 M20lcum[l+1] = M20lcum[l] + M20l[l]*pcp5[l];
-                
+
                 Mplcum[l+1] = Mplcum[l] + Mpl[l]*pcp5[l];
                 Mp5lcum[l+1] = Mp5lcum[l] + Mp5l[l]*pcp5[l];
                 Mp20lcum[l+1] = Mp20lcum[l] + Mp20l[l]*pcp5[l];
@@ -1910,13 +1960,13 @@ void Diff(std::vector<double> y)
                 Flcum[l+1] = Flcum[l] + Fl[l]*pcp5[l];
                 Wlcum[l+1] = Wlcum[l] + Wl[l]*pcp5[l];
                 lambdalcum[l+1] = lambdalcum[l]+lambdal[l]*pcp5[l];
-                
+
               }
             }
             M = Mlcum[ncp];
             M5 = M5lcum[ncp];
             M20 = M20lcum[ncp];
-            
+
             Mp = Mplcum[ncp];
             Mp5 = Mp5lcum[ncp];
             Mp20 = Mp20lcum[ncp];
@@ -1924,12 +1974,12 @@ void Diff(std::vector<double> y)
             F = Flcum[ncp];
             W = Wlcum[ncp];
             lambda = lambdalcum[ncp];
-                
+
                 Msq = Mjsqcum[na];
                 varM = varMjcum[na] + Msq - M*M;
-            
+
               }
-            
+
             /* *************************************************************
               update parameter values at each time step
             *************************************************************** */
@@ -2017,7 +2067,7 @@ void Diff(std::vector<double> y)
               }
             }
               }
-            
+
             /* *************************************************************
               set state indicators for different worm age groups
             *************************************************************** */
@@ -2028,7 +2078,7 @@ void Diff(std::vector<double> y)
             {
               L4id[ii] = ii;
             }
-            
+
             for (ii=0;ii<nW;ii++)
             {
               Nid[ii] = nL4 + 0*nW + ii;
@@ -2039,8 +2089,8 @@ void Diff(std::vector<double> y)
               Mid[ii] = nL4+2*nW + ii;
             }
               }
-            
-            
+
+
             /* *************************************************************
               initial value generator
             *************************************************************** */
@@ -2081,7 +2131,7 @@ void Diff(std::vector<double> y)
                         y[i+Nid[ii]*nev[l]+jump] = 0;
                         y[i+Fid[ii]*nev[l]+jump] = 0;
                       }
-                      
+
                     }// end 2nd ii loop
                     for (ii=0;ii<nM;ii++)
                     {
@@ -2091,7 +2141,7 @@ void Diff(std::vector<double> y)
                         y[i+Mid[ii]*nev[l]+jump] = 0;
                       }
                     } // end 3rd ii loop
-                    
+
                   }// end i loop
                   y[j+jumptoL1] = 0.02;
                   y[j+jumptoL2] = 0.02;
@@ -2100,10 +2150,10 @@ void Diff(std::vector<double> y)
               } // end k loop
             } // end l loop
               }
-            
-            
-            
-            
+
+
+
+
             /* *************************************************************
               Runga Kutta integrator
             *************************************************************** */
@@ -2115,28 +2165,28 @@ void Diff(std::vector<double> y)
             for (i=0; i<neq; i++) {
               inity[i] = y[i];
             }
-            
+
             Diff(inity);
             for (i=0;i<neq;i++)
             {
               ydot1[i]=ydot[i];
               tmpy[i]=inity[i]+step*ydot1[i]/2;
             }
-            
+
             Diff(tmpy);
             for (i=0;i<neq;i++)
             {
               ydot2[i]=ydot[i];
               tmpy[i]=inity[i]+step*ydot2[i]/2;
             }
-            
+
             Diff(tmpy);
             for (i=0;i<neq;i++)
             {
               ydot3[i]=ydot[i];
               tmpy[i]=inity[i]+step*ydot3[i]/2;
             }
-            
+
             Diff(tmpy);
             for (i=0;i<neq;i++)
             {
@@ -2148,8 +2198,4 @@ void Diff(std::vector<double> y)
               y[i] = tmpy[i];
             }
             return;
-              } 
-            
-            
-            
-            
+              }
